@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './AuthContext'
 import Login from './components/Login'
+import Chat from './components/Chat'
+
 
 function App() {
   return (
@@ -8,7 +10,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Login />} />
-          <Route path="/chat" element={<h1>Chat Page</h1>} />
+          <Route path="/chat" element={<Chat />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
