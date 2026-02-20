@@ -41,6 +41,10 @@ function Chat() {
     setMessages((prev) => [...prev, newMessage])
   }
 
+  const handleClearChat = () => {
+    setMessages([])
+  }
+
   return (
     <div className="flex h-screen bg-gray-100">
 
@@ -53,7 +57,7 @@ function Chat() {
       </div>
 
       <div className="flex flex-col w-3/4">
-        <ChatHeader user={selectedUser} />
+        <ChatHeader user={selectedUser} onClearChat={handleClearChat} />
 
         <div className="flex-1 overflow-y-auto">
           <ChatWindow messages={messages} />
