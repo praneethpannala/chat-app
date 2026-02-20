@@ -1,17 +1,24 @@
 import { useAuth } from '../AuthContext'
 import { useNavigate } from 'react-router-dom'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Sidebar from './SideBar'
 import ChatWindow from './ChatWindow'
 import InputBar from './InputBar'
 import ChatHeader from './ChatHeader'
 
 // dummy selected user for now
-const selectedUser = { id: 1, name: 'Alice', online: true }
+const users = [
+  { id: 1, name: 'Alice', online: true },
+  { id: 2, name: 'Bob', online: false },
+  { id: 3, name: 'Charlie', online: true },
+  { id: 4, name: 'Diana', online: false },
+]
 
 function Chat() {
   const { user } = useAuth()
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const [selectedUser, setSelectedUser] = useState(users[0]) // ← first user by default
+
 
   useEffect(() => {
     if (!user) navigate('/')
@@ -22,7 +29,11 @@ function Chat() {
 
       {/* Left Sidebar */}
       <div className="w-1/4 bg-white border-r border-gray-200">
-        <Sidebar />
+        <Sidebar 
+          users={users}
+          onSelectUser={setSelectedUser} 
+          selectedUser={selectedUser} 
+        />
       </div>
 
       {/* Right Chat Area */}
