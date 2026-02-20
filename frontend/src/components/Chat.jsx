@@ -2,8 +2,8 @@ import { useAuth } from '../AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import Sidebar from './SideBar'
-// import ChatWindow from './ChatWindow'
-// import InputBar from './InputBar'
+import ChatWindow from './ChatWindow'
+import InputBar from './InputBar'
 
 function Chat() {
   const { user } = useAuth()
@@ -22,8 +22,20 @@ function Chat() {
         <Sidebar />
       </div>
 
-        {/* Chat Area */}
-      
+      {/* Right Chat Area */}
+      <div className="flex flex-col w-3/4">
+
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto">
+          <ChatWindow />
+        </div>
+
+        {/* Input */}
+        <div className="border-t border-gray-200">
+          <InputBar />
+        </div>
+
+      </div>
     </div>
   )
 }
