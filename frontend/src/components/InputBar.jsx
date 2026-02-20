@@ -1,11 +1,11 @@
 import { useState } from 'react'
 
-function InputBar() {
+function InputBar({ onSend }) {
   const [message, setMessage] = useState('')
 
   const handleSend = () => {
     if (!message.trim()) return
-    console.log('Message sent:', message)
+    onSend(message)
     setMessage('')
   }
 
@@ -15,8 +15,6 @@ function InputBar() {
 
   return (
     <div className="flex items-center gap-3 p-4 bg-white">
-
-      {/* Input Field */}
       <input
         type="text"
         value={message}
@@ -25,8 +23,6 @@ function InputBar() {
         placeholder="Type a message..."
         className="flex-1 border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-blue-400"
       />
-
-      {/* Send Button */}
       <button
         onClick={handleSend}
         disabled={!message.trim()}
@@ -34,7 +30,6 @@ function InputBar() {
       >
         Send
       </button>
-
     </div>
   )
 }
