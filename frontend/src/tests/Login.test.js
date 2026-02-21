@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import Login from '../components/Login'
 
@@ -42,6 +42,10 @@ test('clicking sign in button calls signInWithPopup', async () => {
   const { signInWithPopup } = require('firebase/auth')
   signInWithPopup.mockResolvedValueOnce({})
   renderLogin()
-  fireEvent.click(screen.getByText('Sign in with Google'))
+  
+  await act(async () => {
+    fireEvent.click(screen.getByText('Sign in with Google'))
+  })
+  
   expect(signInWithPopup).toHaveBeenCalled()
 })

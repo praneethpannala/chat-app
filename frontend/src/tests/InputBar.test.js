@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import InputBar from '../components/InputBar'
 
 // Mock EmojiPicker to avoid issues with the emoji picker library
@@ -62,11 +62,15 @@ describe('InputBar Component', () => {
     renderInputBar({ onSend })
 
     const input = screen.getByPlaceholderText('Type a message...')
-    fireEvent.change(input, { target: { value: 'Test message' } })
+    act(() => {
+      fireEvent.change(input, { target: { value: 'Test message' } })
+    })
 
     const buttons = screen.getAllByRole('button')
     const sendButton = buttons[buttons.length - 1] // Last button is send
-    fireEvent.click(sendButton)
+    act(() => {
+      fireEvent.click(sendButton)
+    })
 
     expect(onSend).toHaveBeenCalledWith('Test message')
   })
@@ -101,11 +105,15 @@ describe('InputBar Component', () => {
     renderInputBar({ onSend })
 
     const input = screen.getByPlaceholderText('Type a message...')
-    fireEvent.change(input, { target: { value: 'Test message' } })
+    act(() => {
+      fireEvent.change(input, { target: { value: 'Test message' } })
+    })
 
     const buttons = screen.getAllByRole('button')
     const sendButton = buttons[buttons.length - 1]
-    fireEvent.click(sendButton)
+    act(() => {
+      fireEvent.click(sendButton)
+    })
 
     expect(input.value).toBe('')
   })
@@ -228,16 +236,22 @@ describe('InputBar Component', () => {
     // Open emoji picker
     const buttons = screen.getAllByRole('button')
     const emojiButton = buttons[0]
-    fireEvent.click(emojiButton)
+    act(() => {
+      fireEvent.click(emojiButton)
+    })
 
     expect(screen.getByTestId('emoji-picker')).toBeInTheDocument()
 
     // Type and send message
     const input = screen.getByPlaceholderText('Type a message...')
-    fireEvent.change(input, { target: { value: 'Test' } })
+    act(() => {
+      fireEvent.change(input, { target: { value: 'Test' } })
+    })
 
     const sendButton = buttons[buttons.length - 1]
-    fireEvent.click(sendButton)
+    act(() => {
+      fireEvent.click(sendButton)
+    })
 
     // Emoji picker should be closed
     expect(screen.queryByTestId('emoji-picker')).not.toBeInTheDocument()
@@ -274,12 +288,16 @@ describe('InputBar Component', () => {
     const sendButton = buttons[buttons.length - 1]
 
     // Send first message
-    fireEvent.change(input, { target: { value: 'First' } })
-    fireEvent.click(sendButton)
+    act(() => {
+      fireEvent.change(input, { target: { value: 'First' } })
+      fireEvent.click(sendButton)
+    })
 
     // Send second message
-    fireEvent.change(input, { target: { value: 'Second' } })
-    fireEvent.click(sendButton)
+    act(() => {
+      fireEvent.change(input, { target: { value: 'Second' } })
+      fireEvent.click(sendButton)
+    })
 
     expect(onSend).toHaveBeenCalledTimes(2)
     expect(onSend).toHaveBeenNthCalledWith(1, 'First')

@@ -1,5 +1,16 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
+
+// Mock Firebase config BEFORE importing Chat component
+jest.mock('../firebase/config', () => ({
+  auth: {},
+  googleProvider: {},
+}))
+
+jest.mock('firebase/auth', () => ({
+  getAuth: jest.fn(),
+}))
+
 import Chat from '../components/Chat'
 
 // Mock scrollIntoView
