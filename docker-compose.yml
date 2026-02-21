@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-
   mongodb:
     image: mongo:6
     container_name: zync-mongodb
@@ -35,6 +34,31 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  backend:
+    build: ./backend
+    container_name: zync-backend
+    ports:
+      - '3001:3001'
+    environment:
+      PORT: 3001
+      MONGODB_URI: mongodb://mongodb:27017/zync
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      KAFKA_BROKER: kafka:9092
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+    depends_on:
+      - mongodb
+      - redis
+      - kafka
+
+  frontend:
+    build: ./frontend
+    container_name: zync-frontend
+    ports:
+      - '80:80'
+    depends_on:
+      - backend
 
 volumes:
   mongodb_data:
