@@ -7,7 +7,7 @@ function MessageStatus({ status }) {
   return null
 }
 
-function ChatWindow({ messages }) {
+function ChatWindow({ messages, currentUserId }) {
   const bottomRef = useRef(null)
 
   useEffect(() => {
@@ -17,15 +17,15 @@ function ChatWindow({ messages }) {
   return (
     <div className="flex flex-col gap-3 p-4 bg-gray-50 min-h-full">
       {messages.map((msg) => {
-        const isMe = msg.senderId === 'me'
+        const isMe = msg.senderId === currentUserId
         return (
           <div
-            key={msg.id}
+            key={msg._id || msg.id}
             className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
           >
             {!isMe && (
               <div className="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-600 text-sm mr-2 mt-1 flex-shrink-0">
-                {msg.senderName[0]}
+                {msg.senderName?.[0] || '?'}
               </div>
             )}
 
@@ -46,7 +46,10 @@ function ChatWindow({ messages }) {
                 <p>{msg.text}</p>
                 <div className={`flex items-center gap-1 mt-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
                   <span className={`text-xs ${isMe ? 'text-blue-100' : 'text-gray-300'}`}>
-                    {msg.time}
+                    {new Date(msg.createdAt).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
                   </span>
                   {isMe && <MessageStatus status={msg.status} />}
                 </div>

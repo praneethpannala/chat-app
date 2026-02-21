@@ -5,44 +5,42 @@ import Sidebar from './SideBar'
 import ChatWindow from './ChatWindow'
 import InputBar from './InputBar'
 import ChatHeader from './ChatHeader'
+import useSocket from '../hooks/useSocket'
 
 const users = [
-  { id: 1, name: 'Alice', online: true },
-  { id: 2, name: 'Bob', online: false },
-  { id: 3, name: 'Charlie', online: true },
-  { id: 4, name: 'Diana', online: false },
-]
-
-const initialMessages = [
-  { id: 1, text: 'Hey there!', senderId: 'alice', senderName: 'Alice', time: '10:00 AM', status: 'read' },
-  { id: 2, text: 'Hello! How are you?', senderId: 'me', senderName: 'Me', time: '10:01 AM', status: 'read' },
-  { id: 3, text: 'I am doing great!', senderId: 'alice', senderName: 'Alice', time: '10:02 AM', status: 'read' },
+  { id: '1', name: 'Alice', online: false },
+  { id: '2', name: 'Bob', online: false },
+  { id: '3', name: 'Charlie', online: false },
+  { id: '4', name: 'Diana', online: false },
 ]
 
 function Chat() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [selectedUser, setSelectedUser] = useState(users[0])
-  const [messages, setMessages] = useState(initialMessages)
+  const { messages, onlineUsers, sendMessage, getMessages, clearChat } = useSocket()
 
   useEffect(() => {
     if (!user) navigate('/')
   }, [user])
 
-  const handleSendMessage = (text) => {
-    const newMessage = {
-      id: messages.length + 1,
-      text,
-      senderId: 'me',
-      senderName: 'Me',
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      status: 'sent',
+  useEffect(() => {
+    if (selectedUser) {
+      getMessages(selectedUser.id)
     }
-    setMessages((prev) => [...prev, newMessage])
+  }, [selectedUser])
+
+  const updatedUsers = users.map((u) => ({
+    ...u,
+    online: onlineUsers.includes(u.id),
+  }))
+
+  const handleSendMessage = (text) => {
+    sendMessage(selectedUser.id, text)
   }
 
   const handleClearChat = () => {
-    setMessages([])
+    clearChat(selectedUser.id)
   }
 
   return (
@@ -50,7 +48,7 @@ function Chat() {
 
       <div className="w-1/4 bg-white border-r border-gray-200">
         <Sidebar
-          users={users}
+          users={updatedUsers}
           onSelectUser={setSelectedUser}
           selectedUser={selectedUser}
         />
@@ -60,7 +58,7 @@ function Chat() {
         <ChatHeader user={selectedUser} onClearChat={handleClearChat} />
 
         <div className="flex-1 overflow-y-auto">
-          <ChatWindow messages={messages} />
+          <ChatWindow messages={messages} currentUserId={user?.uid} />
         </div>
 
         <div className="border-t border-gray-200">
