@@ -37,7 +37,7 @@ function Login() {
       <div className="bg-white bg-opacity-90 p-10 rounded-2xl shadow-2xl flex flex-col items-center gap-6 w-96">
 
         {/* App Title */}
-        <h1 className="text-4xl font-bold text-blue-600">💬 Zync</h1>
+        <h1 className="text-4xl font-bold text-blue-600">Zync</h1>
         <p className="text-gray-400 text-sm">Real-time chat, in sync.</p>
 
         {/* Divider */}

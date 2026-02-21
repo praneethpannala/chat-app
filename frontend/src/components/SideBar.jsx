@@ -27,7 +27,7 @@ function Sidebar({ users, onSelectUser, selectedUser }) {
     <div className="flex flex-col h-full">
 
       <div className="p-4 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-blue-500">💬 Zync</h1>
+        <h1 className="text-2xl font-bold text-blue-500">Zync</h1>
       </div>
 
       <div className="p-3 border-b border-gray-100">
