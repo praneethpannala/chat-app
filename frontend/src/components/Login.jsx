@@ -12,7 +12,7 @@ function Login() {
   // if already logged in, go straight to chat
   useEffect(() => {
     if (user) navigate('/chat')
-  }, [user])
+  }, [user, navigate])
 
   const handleGoogleLogin = async () => {
     try {

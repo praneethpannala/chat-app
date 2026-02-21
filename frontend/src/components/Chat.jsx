@@ -22,13 +22,13 @@ function Chat() {
 
   useEffect(() => {
     if (!user) navigate('/')
-  }, [user])
+  }, [user, navigate])
 
   useEffect(() => {
     if (selectedUser) {
       getMessages(selectedUser.id)
     }
-  }, [selectedUser])
+  }, [selectedUser, getMessages])
 
   const updatedUsers = users.map((u) => ({
     ...u,
