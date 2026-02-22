@@ -11,8 +11,9 @@ export default function useSocket() {
   useEffect(() => {
     if (!user) return
 
-    socketRef.current = io('http://localhost:3001', {
+    socketRef.current = io(window.location.origin, {
       query: { userId: user.uid },
+      path: '/socket.io',
     })
 
     socketRef.current.on('receiveMessage', (message) => {
@@ -29,6 +30,18 @@ export default function useSocket() {
 
     socketRef.current.on('chatCleared', () => {
       setMessages([])
+    });
+
+    socketRef.current.on('connect', () => {
+      console.log('Socket connected!')
+    })
+
+    socketRef.current.on('connect_error', (error) => {
+      console.error('Socket connection error:', error)
+    })
+
+    socketRef.current.on('disconnect', () => {
+      console.log('Socket disconnected!')
     })
 
     return () => {
