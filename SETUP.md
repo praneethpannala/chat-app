@@ -75,7 +75,7 @@ Best for development — faster, no need to rebuild Docker images on every chang
 
 ```bash
 cd chat-app
-docker-compose up -d mongodb redis zookeeper kafka
+docker compose up -d mongodb redis zookeeper kafka
 ```
 
 Wait about 30 seconds for Kafka to fully start.
@@ -116,7 +116,7 @@ Runs everything in Docker including NGINX load balancer and 3 backend instances.
 
 ```bash
 cd chat-app
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 First build takes 10-15 minutes. Subsequent builds are faster.
@@ -155,7 +155,7 @@ zync-zookeeper
 
 **Stop Docker containers:**
 ```bash
-docker-compose down
+docker compose down
 ```
 
 **Stop local backend/frontend:**
@@ -169,7 +169,7 @@ Press `Ctrl + C` in each terminal window.
 ### Development Mode:
 ```bash
 # Step 1 - Start Docker infrastructure
-docker-compose up -d mongodb redis zookeeper kafka
+docker compose up -d mongodb redis zookeeper kafka
 
 # Step 2 - Start backend (new terminal)
 cd backend && npm run start:dev
@@ -180,7 +180,7 @@ cd frontend && npm start
 
 ### Production Mode:
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ---
@@ -210,7 +210,7 @@ npm test -- --watchAll=false --testPathPattern=Login
 
 ```bash
 # All containers
-docker-compose logs -f
+docker compose logs -f
 
 # Specific container
 docker logs zync-backend1
@@ -226,29 +226,29 @@ docker logs zync-kafka
 **Kafka connection error:**
 ```bash
 # Wait 30 seconds after starting, then restart backends
-docker-compose restart backend1 backend2 backend3
+docker compose restart backend1 backend2 backend3
 ```
 
 **MongoDB version error:**
 ```bash
 # Delete old volume and restart
-docker-compose down
+docker compose down
 docker volume rm chat-app_mongodb_data
-docker-compose up -d
+docker compose up -d
 ```
 
 **Frontend showing old config:**
 ```bash
 # Force rebuild frontend
-docker-compose build --no-cache frontend
-docker-compose up -d
+docker compose build --no-cache frontend
+docker compose up -d
 ```
 
 **Port already in use:**
 ```bash
 # Stop all containers and try again
-docker-compose down
-docker-compose up -d
+docker compose down
+docker compose up -d
 ```
 
 **SSL certificate not found:**

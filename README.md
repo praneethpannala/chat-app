@@ -57,7 +57,7 @@ chat-app/
 ├── nginx/                  # Load balancer config
 │   ├── nginx.conf
 │   └── certs/              # SSL certificates
-├── docker-compose.yml
+├── docker compose.yml
 └── .env                    # Root env for Docker Compose
 ```
 
@@ -124,7 +124,7 @@ cd ../..
 
 **Step 3 — Start infrastructure (MongoDB, Redis, Kafka)**
 ```bash
-docker-compose up -d mongodb redis zookeeper kafka
+docker compose up -d mongodb redis zookeeper kafka
 ```
 
 **Step 4 — Start backend**
@@ -148,7 +148,7 @@ Access the app at `http://localhost:3000`
 ### Production Mode (Full Docker)
 
 ```bash
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 Access the app at:
@@ -238,6 +238,6 @@ GitHub Actions automatically runs on every push to `main` or `dev`:
 ## Startup Sequence (After System Restart)
 
 1. Start Docker Desktop
-2. Run `docker-compose up -d` (starts MongoDB, Redis, Kafka)
+2. Run `docker compose up -d` (starts MongoDB, Redis, Kafka)
 3. Run `cd backend && npm run start:dev`
 4. Run `cd frontend && npm start`
