@@ -68,6 +68,7 @@ services:
     build: ./backend
     container_name: zync-backend1
     environment:
+      KAFKAJS_NO_PARTITIONER_WARNING: 1
       PORT: 3001
       MONGODB_URI: mongodb://mongodb:27017/zync
       REDIS_HOST: redis
@@ -91,6 +92,7 @@ services:
     build: ./backend
     container_name: zync-backend2
     environment:
+      KAFKAJS_NO_PARTITIONER_WARNING: 1
       PORT: 3002
       MONGODB_URI: mongodb://mongodb:27017/zync
       REDIS_HOST: redis
@@ -114,6 +116,7 @@ services:
     build: ./backend
     container_name: zync-backend3
     environment:
+      KAFKAJS_NO_PARTITIONER_WARNING: 1
       PORT: 3003
       MONGODB_URI: mongodb://mongodb:27017/zync
       REDIS_HOST: redis

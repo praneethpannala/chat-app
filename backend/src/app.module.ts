@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MessagesModule } from './messages/messages.module';
 import { ChatModule } from './chat/chat.module';
+import { UsersModule } from './users/users.module';
 import { RedisService } from './redis.service';
 import { KafkaService } from './kafka.service';
 import * as admin from 'firebase-admin';
@@ -21,6 +22,7 @@ import * as admin from 'firebase-admin';
     }),
     MessagesModule,
     ChatModule,
+    UsersModule,
   ],
   providers: [RedisService, KafkaService],
   exports: [RedisService, KafkaService],

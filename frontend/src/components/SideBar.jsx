@@ -47,18 +47,26 @@ function Sidebar({ users, onSelectUser, selectedUser }) {
         {filteredUsers.length > 0 ? (
           filteredUsers.map((u) => (
             <div
-              key={u.id}
+              key={u.uid || u.id}
               onClick={() => onSelectUser(u)}
               className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition ${
-                selectedUser?.id === u.id
+                selectedUser?.uid === u.uid || selectedUser?.id === u.id
                   ? 'bg-blue-50 border border-blue-100'
                   : 'hover:bg-gray-100'
               }`}
             >
               <div className="relative">
-                <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-600">
-                  {u.name[0]}
-                </div>
+                {u.photoURL ? (
+                  <img
+                    src={u.photoURL}
+                    alt={u.name}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-600">
+                    {u.name[0]}
+                  </div>
+                )}
                 <span
                   className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
                     u.online ? 'bg-green-400' : 'bg-gray-300'
@@ -79,14 +87,19 @@ function Sidebar({ users, onSelectUser, selectedUser }) {
         )}
       </div>
 
-      {/* Current User at bottom */}
       <div className="p-4 border-t border-gray-200 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <img
-            src={user?.photoURL || 'https://via.placeholder.com/40'}
-            alt="profile"
-            className="w-9 h-9 rounded-full"
-          />
+          {user?.photoURL ? (
+            <img
+              src={user.photoURL}
+              alt="profile"
+              className="w-9 h-9 rounded-full object-cover"
+            />
+          ) : (
+            <div className="w-9 h-9 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-600">
+              {user?.displayName?.[0]}
+            </div>
+          )}
           <div className="flex flex-col">
             <p className="text-sm font-medium text-gray-700">
               {user?.displayName}
@@ -95,7 +108,6 @@ function Sidebar({ users, onSelectUser, selectedUser }) {
           </div>
         </div>
 
-        {/* Logout Icon Button */}
         <button
           onClick={handleLogout}
           title="Logout"

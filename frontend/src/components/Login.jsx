@@ -4,19 +4,28 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
 import { useEffect } from 'react'
 import loginBackgroundImage from '../images/loginBackgroundImage.jpg'
+import axios from 'axios'
 
 function Login() {
   const navigate = useNavigate()
   const { user } = useAuth()
 
-  // if already logged in, go straight to chat
   useEffect(() => {
     if (user) navigate('/chat')
   }, [user, navigate])
 
   const handleGoogleLogin = async () => {
     try {
-      await signInWithPopup(auth, googleProvider)
+      const result = await signInWithPopup(auth, googleProvider)
+      const loggedInUser = result.user
+
+      await axios.post('http://localhost:3001/users/save', {
+        uid: loggedInUser.uid,
+        name: loggedInUser.displayName,
+        email: loggedInUser.email,
+        photoURL: loggedInUser.photoURL,
+      })
+
       navigate('/chat')
     } catch (error) {
       console.error('Login failed:', error)
@@ -33,17 +42,10 @@ function Login() {
         backgroundRepeat: 'no-repeat',
       }}
     >
-      {/* Card */}
       <div className="bg-white bg-opacity-90 p-10 rounded-2xl shadow-2xl flex flex-col items-center gap-6 w-96">
-
-        {/* App Title */}
         <h1 className="text-4xl font-bold text-blue-600">Zync</h1>
         <p className="text-gray-400 text-sm">Real-time chat, in sync.</p>
-
-        {/* Divider */}
         <div className="w-full border-t border-gray-200"></div>
-
-        {/* Google Login Button */}
         <button
           onClick={handleGoogleLogin}
           className="flex items-center gap-3 border border-gray-300 w-full justify-center px-6 py-3 rounded-xl hover:bg-gray-50 transition shadow-sm"
@@ -55,12 +57,9 @@ function Login() {
           />
           <span className="text-gray-600 font-medium">Sign in with Google</span>
         </button>
-
-        {/* Footer text */}
         <p className="text-xs text-gray-300 text-center">
           By signing in you agree to our Terms & Privacy Policy
         </p>
-
       </div>
     </div>
   )

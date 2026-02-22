@@ -6,18 +6,13 @@ import ChatWindow from './ChatWindow'
 import InputBar from './InputBar'
 import ChatHeader from './ChatHeader'
 import useSocket from '../hooks/useSocket'
-
-const users = [
-  { id: '1', name: 'Alice', online: false },
-  { id: '2', name: 'Bob', online: false },
-  { id: '3', name: 'Charlie', online: false },
-  { id: '4', name: 'Diana', online: false },
-]
+import axios from 'axios'
 
 function Chat() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const [selectedUser, setSelectedUser] = useState(users[0])
+  const [users, setUsers] = useState([])
+  const [selectedUser, setSelectedUser] = useState(null)
   const { messages, onlineUsers, sendMessage, getMessages, clearChat } = useSocket()
 
   useEffect(() => {
@@ -25,27 +20,46 @@ function Chat() {
   }, [user, navigate])
 
   useEffect(() => {
+    if (user) fetchUsers()
+  }, [user])
+
+  useEffect(() => {
     if (selectedUser) {
-      getMessages(selectedUser.id)
+      getMessages(selectedUser.uid)
     }
   }, [selectedUser, getMessages])
 
+  const fetchUsers = async () => {
+    try {
+      const token = await user.getIdToken()
+      const response = await axios.get('http://localhost:3001/users', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const fetchedUsers = response.data
+      setUsers(fetchedUsers)
+      if (fetchedUsers.length > 0) {
+        setSelectedUser(fetchedUsers[0])
+      }
+    } catch (error) {
+      console.error('Failed to fetch users:', error)
+    }
+  }
+
   const updatedUsers = users.map((u) => ({
     ...u,
-    online: onlineUsers.includes(u.id),
+    online: onlineUsers.includes(u.uid),
   }))
 
   const handleSendMessage = (text) => {
-    sendMessage(selectedUser.id, text)
+    sendMessage(selectedUser.uid, text)
   }
 
   const handleClearChat = () => {
-    clearChat(selectedUser.id)
+    clearChat(selectedUser.uid)
   }
 
   return (
     <div className="flex h-screen bg-gray-100">
-
       <div className="w-1/4 bg-white border-r border-gray-200">
         <Sidebar
           users={updatedUsers}
@@ -55,17 +69,24 @@ function Chat() {
       </div>
 
       <div className="flex flex-col w-3/4">
-        <ChatHeader user={selectedUser} onClearChat={handleClearChat} />
-
-        <div className="flex-1 overflow-y-auto">
-          <ChatWindow messages={messages} currentUserId={user?.uid} />
-        </div>
-
-        <div className="border-t border-gray-200">
-          <InputBar onSend={handleSendMessage} />
-        </div>
+        {selectedUser ? (
+          <>
+            <ChatHeader user={selectedUser} onClearChat={handleClearChat} />
+            <div className="flex-1 overflow-y-auto">
+              <ChatWindow messages={messages} currentUserId={user?.uid} />
+            </div>
+            <div className="border-t border-gray-200">
+              <InputBar onSend={handleSendMessage} />
+            </div>
+          </>
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center text-gray-300">
+            <p className="text-6xl mb-4">💬</p>
+            <p className="text-xl font-semibold">Welcome to Zync</p>
+            <p className="text-sm mt-2">No users found</p>
+          </div>
+        )}
       </div>
-
     </div>
   )
 }
