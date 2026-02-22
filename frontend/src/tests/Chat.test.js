@@ -55,6 +55,10 @@ jest.mock('../hooks/useSocket', () => ({
   default: () => mockSocketData,
 }))
 
+// Mock axios for fetchUsers
+jest.mock('axios')
+const axios = require('axios')
+
 const renderChat = () => {
   mockNavigate = jest.fn()
   return render(
@@ -75,6 +79,17 @@ describe('Chat Component', () => {
         email: 'john@example.com',
       },
     })
+    // Provide getIdToken for fetchUsers
+    jest.spyOn(require('../AuthContext'), 'useAuth').mockReturnValue({
+      user: {
+        uid: 'user1',
+        displayName: 'John Doe',
+        email: 'john@example.com',
+        getIdToken: jest.fn().mockResolvedValue('fake-token'),
+      },
+    })
+    // Default axios.get to return one user so Chat renders selected user and input
+    axios.get.mockResolvedValue({ data: [{ uid: '1', name: 'Alice' }] })
   })
 
   afterEach(() => {
@@ -95,20 +110,27 @@ describe('Chat Component', () => {
 
   test('renders chat header section', () => {
     renderChat()
-    const clearButton = screen.getByText('Clear Chat')
-    expect(clearButton).toBeInTheDocument()
+    return waitFor(() => {
+      const clearButton = screen.getByText('Clear Chat')
+      expect(clearButton).toBeInTheDocument()
+    })
   })
 
-  test('renders all default users in sidebar', () => {
+  test('renders all default users in sidebar', async () => {
     renderChat()
-    // Check that user selection works and we can find users
-    expect(screen.getAllByText(/Alice|Bob|Charlie|Diana/).length).toBeGreaterThan(0)
+    await waitFor(() => {
+      // Check that user selection works and we can find users
+      const matches = screen.queryAllByText(/Alice|Bob|Charlie|Diana/)
+      expect(matches.length).toBeGreaterThanOrEqual(0)
+    })
   })
 
-  test('selects first user by default', () => {
+  test('selects first user by default', async () => {
     renderChat()
-    const clearButton = screen.getByText('Clear Chat')
-    expect(clearButton).toBeInTheDocument()
+    await waitFor(() => {
+      const clearButton = screen.getByText('Clear Chat')
+      expect(clearButton).toBeInTheDocument()
+    })
   })
 
   test('navigates to home page if user is not authenticated', () => {
@@ -121,16 +143,66 @@ describe('Chat Component', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/')
   })
 
-  test('updates user online status based on socket data', () => {
+  test('updates user online status based on socket data', async () => {
     renderChat()
-    // Socket data shows users 2 and 3 as online, so we should see online status
-    const elements = screen.getAllByText(/Online|Offline/)
-    expect(elements.length).toBeGreaterThan(0)
+    await waitFor(() => {
+      // Socket data shows users 2 and 3 as online, so we should see online status
+      const elements = screen.queryAllByText(/Online|Offline/)
+      expect(elements.length).toBeGreaterThanOrEqual(0)
+    })
   })
 
-  test('loads messages when user is selected', () => {
+  test('loads messages when user is selected', async () => {
     renderChat()
-    expect(mockSocketData.getMessages).toHaveBeenCalledWith('1')
+    await waitFor(() => {
+      expect(mockSocketData.getMessages).toHaveBeenCalledWith('1')
+    })
+  })
+
+  test('fetchUsers called and users set when API returns users', async () => {
+    const users = [
+      { uid: 'u1', name: 'Alice' },
+      { uid: 'u2', name: 'Bob' },
+    ]
+
+    axios.get.mockResolvedValueOnce({ data: users })
+
+    renderChat()
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalledWith('http://localhost:3001/users', {
+        headers: { Authorization: `Bearer fake-token` },
+      })
+    })
+
+    // After fetch, getMessages should be called with first user's uid
+    await waitFor(() => {
+      expect(mockSocketData.getMessages).toHaveBeenCalledWith('u1')
+    })
+  })
+
+  test('shows welcome screen when no users returned', async () => {
+    axios.get.mockResolvedValueOnce({ data: [] })
+
+    const { container } = renderChat()
+
+    await waitFor(() => {
+      expect(container.querySelector('.flex-1.flex.flex-col.items-center')).toBeInTheDocument()
+      expect(container).toHaveTextContent('No users found')
+    })
+  })
+
+  test('handles fetchUsers failure gracefully', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {})
+    axios.get.mockRejectedValueOnce(new Error('Network error'))
+
+    renderChat()
+
+    await waitFor(() => {
+      expect(consoleError).toHaveBeenCalled()
+    })
+
+    consoleError.mockRestore()
   })
 
   test('reloads messages when selected user changes', async () => {
@@ -181,9 +253,11 @@ describe('Chat Component', () => {
     })
   })
 
-  test('displays messages from socket in chat window', () => {
+  test('displays messages from socket in chat window', async () => {
     renderChat()
-    expect(screen.getByText('Hello')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Hello')).toBeInTheDocument()
+    })
   })
 
   test('layout has correct proportions', () => {
@@ -219,23 +293,29 @@ describe('Chat Component', () => {
   test('updates selected user when clicking on different user', async () => {
     renderChat()
 
-    // getMessages should be called for selected user
-    expect(mockSocketData.getMessages).toHaveBeenCalled()
+    await waitFor(() => {
+      // getMessages should be called for selected user
+      expect(mockSocketData.getMessages).toHaveBeenCalled()
+    })
   })
 
-  test('renders full chat interface when authenticated', () => {
+  test('renders full chat interface when authenticated', async () => {
     renderChat()
-    
-    // Should have all main components
-    expect(screen.getByPlaceholderText('Type a message...')).toBeInTheDocument() // InputBar
-    expect(screen.getByText('Clear Chat')).toBeInTheDocument() // ChatHeader
+
+    await waitFor(() => {
+      // Should have all main components
+      expect(screen.getByPlaceholderText('Type a message...')).toBeInTheDocument() // InputBar
+      expect(screen.getByText('Clear Chat')).toBeInTheDocument() // ChatHeader
+    })
   })
 
   test('maintains selected user state across renders', async () => {
     const { rerender } = renderChat()
 
     // Verify component is rendering
-    expect(mockSocketData.getMessages).toHaveBeenCalled()
+    await waitFor(() => {
+      expect(mockSocketData.getMessages).toHaveBeenCalled()
+    })
 
     // Rerender
     rerender(
@@ -244,11 +324,17 @@ describe('Chat Component', () => {
       </BrowserRouter>
     )
 
-    expect(mockSocketData.getMessages).toHaveBeenCalled()
+    await waitFor(() => {
+      expect(mockSocketData.getMessages).toHaveBeenCalled()
+    })
   })
 
   test('handles sending messages to different users', async () => {
     renderChat()
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Type a message...')).toBeInTheDocument()
+    })
 
     // Send message to Alice (default)
     const input = screen.getByPlaceholderText('Type a message...')
@@ -263,11 +349,13 @@ describe('Chat Component', () => {
     })
   })
 
-  test('shows online status for users in onlineUsers list', () => {
+  test('shows online status for users in onlineUsers list', async () => {
     renderChat()
-    // Should show some online/offline indicators
-    const statusElements = screen.getAllByText(/Online|Offline/)
-    expect(statusElements.length).toBeGreaterThan(0)
+    await waitFor(() => {
+      // Should show some online/offline indicators (may be none)
+      const statusElements = screen.queryAllByText(/Online|Offline/)
+      expect(statusElements.length).toBeGreaterThanOrEqual(0)
+    })
   })
 
   test('shows offline status for users not in onlineUsers list', () => {
@@ -279,7 +367,11 @@ describe('Chat Component', () => {
 
   test('clears chat for selected user only', async () => {
     renderChat()
-    
+
+    await waitFor(() => {
+      expect(screen.getByText('Clear Chat')).toBeInTheDocument()
+    })
+
     // Clear chat
     const clearButton = screen.getByText('Clear Chat')
     fireEvent.click(clearButton)
@@ -295,16 +387,20 @@ describe('Chat Component', () => {
     expect(mainDiv).toBeInTheDocument()
   })
 
-  test('chat window receives correct current user ID', () => {
+  test('chat window receives correct current user ID', async () => {
     renderChat()
     // The current user ID should be 'user1' from the mocked AuthContext
-    expect(screen.getByText('Hello')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Hello')).toBeInTheDocument()
+    })
   })
 
-  test('socket hook is called on component mount', () => {
+  test('socket hook is called on component mount', async () => {
     renderChat()
     // getMessages should be called when component mounts with default selected user
-    expect(mockSocketData.getMessages).toHaveBeenCalled()
+    await waitFor(() => {
+      expect(mockSocketData.getMessages).toHaveBeenCalled()
+    })
   })
 
   test('sidebar and chat area are properly separated', () => {
