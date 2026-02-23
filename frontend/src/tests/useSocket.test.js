@@ -57,7 +57,7 @@ describe('useSocket Hook', () => {
   test('connects to socket when user is authenticated', () => {
     renderHook(() => useSocket())
 
-    expect(io).toHaveBeenCalledWith(window.location.origin, {
+    expect(io).toHaveBeenCalledWith('http://localhost:3001', {
       query: { userId: 'user123' },
       path: '/socket.io',
     })
@@ -292,7 +292,7 @@ describe('useSocket Hook', () => {
     renderHook(() => useSocket())
 
     const hostArg = io.mock.calls[0][0]
-    expect(hostArg).toBe(window.location.origin)
+    expect(hostArg).toBe('http://localhost:3001')
   })
 
   test('maintains messages across online users update', async () => {
@@ -422,7 +422,7 @@ describe('useSocket Hook', () => {
 
     // Should have reconnected with new user
     expect(io).toHaveBeenCalledTimes(2)
-    expect(io).toHaveBeenLastCalledWith(window.location.origin, {
+    expect(io).toHaveBeenLastCalledWith('http://localhost:3001', {
       query: { userId: 'user456' },
       path: '/socket.io',
     })
@@ -631,7 +631,7 @@ describe('useSocket Hook', () => {
 
     const callArgs = io.mock.calls[0]
     expect(callArgs).toHaveLength(2)
-    expect(callArgs[0]).toBe(window.location.origin)
+    expect(callArgs[0]).toBe('http://localhost:3001')
     expect(callArgs[1]).toEqual({
       query: { userId: 'user123' },
       path: '/socket.io',
@@ -748,11 +748,11 @@ describe('useSocket Hook', () => {
     expect(mockDisconnect).not.toHaveBeenCalled()
   })
 
-  test('socket connects to window.location.origin', () => {
+  test('socket connects to correct backend URL', () => {
     renderHook(() => useSocket())
 
     const hostArg = io.mock.calls[0][0]
-    expect(hostArg).toBe(window.location.origin)
+    expect(hostArg).toBe('http://localhost:3001')
   })
 
   test('socket path is correctly configured', () => {
@@ -1067,7 +1067,7 @@ describe('useSocket Hook', () => {
 
     renderHook(() => useSocket())
 
-    expect(io).toHaveBeenCalledWith(window.location.origin, {
+    expect(io).toHaveBeenCalledWith('http://localhost:3001', {
       query: { userId: 'user-123@example.com' },
       path: '/socket.io',
     })
@@ -1252,7 +1252,7 @@ describe('useSocket Hook', () => {
 
     renderHook(() => useSocket())
 
-    expect(io).toHaveBeenCalledWith(window.location.origin, {
+    expect(io).toHaveBeenCalledWith('http://localhost:3001', {
       query: { userId: 'user-complete-123' },
       path: '/socket.io',
     })

@@ -350,10 +350,15 @@ describe('ChatGateway', () => {
       await expect(gateway.handleDisconnect(mockClient as any)).rejects.toThrow('Redis error');
     });
 
-    it('should handle Kafka sendMessage error', async () => {
+    it('should handle Kafka sendMessage error gracefully', async () => {
       mockKafkaService.sendMessage.mockRejectedValue(new Error('Kafka error'));
       const data = { senderId: 'user1', receiverId: 'user2', text: 'test' };
-      await expect(gateway.handleMessage(mockClient as any, data)).rejects.toThrow('Kafka error');
+      const savedMessage = { ...data, _id: 'msg1', status: 'sent' };
+      mockMessagesService.saveMessage.mockResolvedValue(savedMessage);
+      
+      // Should not throw even if Kafka fails (runs in background)
+      const result = await gateway.handleMessage(mockClient as any, data);
+      expect(result).toEqual(savedMessage);
     });
 
     it('should handle MessagesService saveMessage error', async () => {
@@ -457,7 +462,7 @@ describe('ChatGateway', () => {
   });
 
   describe('async operation ordering', () => {
-    it('should save to Kafka before saving to DB on message', async () => {
+    it('should save to DB before sending to Kafka in background on message', async () => {
       const callOrder = [];
       mockKafkaService.sendMessage.mockImplementation(() => {
         callOrder.push('kafka');
@@ -471,8 +476,9 @@ describe('ChatGateway', () => {
       const data = { senderId: 'user1', receiverId: 'user2', text: 'test' };
       await gateway.handleMessage(mockClient as any, data);
 
-      expect(callOrder[0]).toBe('kafka');
-      expect(callOrder[1]).toBe('db');
+      // DB should be saved first, then Kafka is called (but not awaited)
+      expect(callOrder[0]).toBe('db');
+      expect(callOrder[1]).toBe('kafka');
     });
 
     it('should emit message after saving', async () => {
