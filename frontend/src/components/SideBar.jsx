@@ -89,17 +89,11 @@ function Sidebar({ users, onSelectUser, selectedUser }) {
 
       <div className="p-4 border-t border-gray-200 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          {user?.photoURL ? (
-            <img
-              src={user.photoURL}
-              alt="profile"
-              className="w-9 h-9 rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-9 h-9 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-600">
-              {user?.displayName?.[0]}
-            </div>
-          )}
+          <img
+            src={user?.photoURL || 'https://via.placeholder.com/40'}
+            alt="profile"
+            className="w-9 h-9 rounded-full object-cover"
+          />
           <div className="flex flex-col">
             <p className="text-sm font-medium text-gray-700">
               {user?.displayName}

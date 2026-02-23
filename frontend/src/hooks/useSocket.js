@@ -54,6 +54,7 @@ export default function useSocket() {
   const sendMessage = (receiverId, text) => {
     console.log('Socket connected?', socketRef.current?.connected)
 
+    if (!user) return
     console.log('Emitting sendMessage:', { senderId: user.uid, receiverId, text })
 
     if (!socketRef.current) return
@@ -65,6 +66,7 @@ export default function useSocket() {
   }
 
   const getMessages = (receiverId) => {
+    if (!user) return
     if (!socketRef.current) return
     socketRef.current.emit('getMessages', {
       senderId: user.uid,
@@ -73,6 +75,7 @@ export default function useSocket() {
   }
 
   const clearChat = (receiverId) => {
+    if (!user) return
     if (!socketRef.current) return
     socketRef.current.emit('clearChat', {
       senderId: user.uid,
