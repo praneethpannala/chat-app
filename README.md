@@ -216,7 +216,6 @@ Both achieve **80%+ test coverage**.
 - Message streaming with Kafka
 - Message status indicators (sent ✓, delivered ✓✓, read ✓✓ in blue)
 - Emoji picker
-- Clear chat (for current user only)
 - User search in sidebar
 - Real user profiles with Google photos
 - NGINX load balancing with HTTPS

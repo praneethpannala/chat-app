@@ -66,11 +66,15 @@ const renderChat = async () => {
       <Chat />
     </BrowserRouter>
   )
-  // wait for initial fetchUsers effect to run if it will be called
+  // wait for the component to finish initial setup (either show a user name in the header or no users message)
   try {
-    await waitFor(() => expect(require('axios').get).toHaveBeenCalled(), { timeout: 1000 })
+    await waitFor(() => {
+      const userName = screen.queryByText(/Alice/)
+      const noUsersMsg = screen.queryByText('No users found')
+      expect(userName || noUsersMsg).toBeTruthy()
+    }, { timeout: 3000 })
   } catch (e) {
-    // ignore - some tests navigate away before fetchUsers runs
+    // Component may not fully render in some tests (e.g., redirect tests)
   }
   return rendered
 }
@@ -108,11 +112,10 @@ describe('Chat Component', () => {
   })
 
   test('renders chat header section', async () => {
-    await renderChat()
-    await waitFor(() => {
-      const clearButton = screen.getByText('Clear Chat')
-      expect(clearButton).toBeInTheDocument()
-    })
+    const { container } = await renderChat()
+    // header container is identified by flex items-center justify-between
+    const header = container.querySelector('.flex.items-center.justify-between')
+    expect(header).toBeInTheDocument()
   })
 
   test('renders all default users in sidebar', async () => {
@@ -127,8 +130,8 @@ describe('Chat Component', () => {
   test('selects first user by default', async () => {
     await renderChat()
     await waitFor(() => {
-      const clearButton = screen.getByText('Clear Chat')
-      expect(clearButton).toBeInTheDocument()
+      // should fetch messages for the first user returned by API
+      expect(mockSocketData.getMessages).toHaveBeenCalledWith('1')
     })
   })
 
@@ -214,13 +217,10 @@ describe('Chat Component', () => {
   })
 
   test('renders ChatWindow with current user ID', async () => {
-    await renderChat()
-    // ChatWindow is rendered in the main chat area
-    await waitFor(async () => {
-      const { container } = await renderChat()
-      const chatArea = container.querySelector('.flex-1')
-      expect(chatArea).toBeInTheDocument()
-    })
+    const { container } = await renderChat()
+    // ChatWindow area should exist once the chat is loaded
+    const chatArea = container.querySelector('.flex-1')
+    expect(chatArea).toBeInTheDocument()
   })
 
   test('renders InputBar for sending messages', async () => {
@@ -250,20 +250,10 @@ describe('Chat Component', () => {
     })
   })
 
-  test('calls clearChat when ChatHeader clear button is clicked', async () => {
+  // feature removed: ChatHeader no longer renders a clear chat button
+  test('does not show clear chat button in header', async () => {
     await renderChat()
-
-    await waitFor(() => {
-      expect(screen.getByText('Clear Chat')).toBeInTheDocument()
-    })
-
-    // Find and click the Clear Chat button
-    const clearButton = screen.getByText('Clear Chat')
-    fireEvent.click(clearButton)
-
-    await waitFor(() => {
-      expect(mockSocketData.clearChat).toHaveBeenCalledWith('1')
-    })
+    expect(screen.queryByText('Clear Chat')).not.toBeInTheDocument()
   })
 
   test('displays messages from socket in chat window', async () => {
@@ -313,12 +303,12 @@ describe('Chat Component', () => {
   })
 
   test('renders full chat interface when authenticated', async () => {
-    await renderChat()
-
+    const { container } = await renderChat()
     await waitFor(() => {
-      // Should have all main components
+      // Should have all main components including header container and input
       expect(screen.getByPlaceholderText('Type a message...')).toBeInTheDocument() // InputBar
-      expect(screen.getByText('Clear Chat')).toBeInTheDocument() // ChatHeader
+      const header = container.querySelector('.flex.items-center.justify-between')
+      expect(header).toBeInTheDocument()
     })
   })
 
@@ -378,20 +368,10 @@ describe('Chat Component', () => {
     expect(offlineElements.length).toBeGreaterThanOrEqual(0)
   })
 
-  test('clears chat for selected user only', async () => {
+  // chat clearing is no longer exposed via UI; ensure clearChat isn't triggered implicitly
+  test('clearChat is not called automatically on render', async () => {
     await renderChat()
-
-    await waitFor(() => {
-      expect(screen.getByText('Clear Chat')).toBeInTheDocument()
-    })
-
-    // Clear chat
-    const clearButton = screen.getByText('Clear Chat')
-    fireEvent.click(clearButton)
-
-    await waitFor(() => {
-      expect(mockSocketData.clearChat).toHaveBeenCalledWith('1')
-    })
+    expect(mockSocketData.clearChat).not.toHaveBeenCalled()
   })
 
   test('renders chat with proper styling classes', async () => {

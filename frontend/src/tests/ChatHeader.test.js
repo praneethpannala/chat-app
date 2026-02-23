@@ -50,19 +50,15 @@ describe('ChatHeader Component', () => {
     expect(statusIndicator).toBeInTheDocument()
   })
 
-  test('renders Clear Chat button', () => {
+  test('does not render Clear Chat button', () => {
     renderChatHeader()
-    expect(screen.getByText('Clear Chat')).toBeInTheDocument()
+    expect(screen.queryByText('Clear Chat')).not.toBeInTheDocument()
   })
 
-  test('calls onClearChat when Clear Chat button is clicked', () => {
+  test('onClearChat prop is not invoked via UI since button is gone', () => {
     const onClearChat = jest.fn()
     renderChatHeader({ onClearChat })
-
-    const clearButton = screen.getByText('Clear Chat')
-    fireEvent.click(clearButton)
-
-    expect(onClearChat).toHaveBeenCalledTimes(1)
+    expect(onClearChat).not.toHaveBeenCalled()
   })
 
   test('renders online status text in green when user is online', () => {
@@ -77,10 +73,13 @@ describe('ChatHeader Component', () => {
     expect(offlineText).toHaveClass('text-gray-400')
   })
 
-  test('renders trash icon for clear chat button', () => {
+  test('does not render trash icon since clear chat button is removed', () => {
     const { container } = renderChatHeader()
-    const button = screen.getByText('Clear Chat').parentElement
-    expect(button.querySelector('svg')).toBeInTheDocument()
+    // there should be no button with svg trash icon
+    const icons = container.querySelectorAll('svg')
+    icons.forEach((icon) => {
+      expect(icon.getAttribute('class')).not.toContain('lucide-trash')
+    })
   })
 
   test('renders header with correct layout', () => {
