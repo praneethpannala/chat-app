@@ -1,5 +1,3 @@
-import { Trash2 } from 'lucide-react'
-
 function ChatHeader({ user, onClearChat }) {
   return (
     <div className="flex items-center justify-between px-6 py-3 bg-gray-50 border-b border-gray-200">
