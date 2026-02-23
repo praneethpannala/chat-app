@@ -25,7 +25,7 @@ function Chat() {
       const interval = setInterval(fetchUsers, 10000) // refresh every 10 seconds
       return () => clearInterval(interval)
     }
-  }, [user])
+  }, [user]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (selectedUser) {
