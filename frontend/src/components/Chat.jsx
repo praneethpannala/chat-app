@@ -20,7 +20,11 @@ function Chat() {
   }, [user, navigate])
 
   useEffect(() => {
-    if (user) fetchUsers()
+    if (user) {
+      fetchUsers()
+      const interval = setInterval(fetchUsers, 10000) // refresh every 10 seconds
+      return () => clearInterval(interval)
+    }
   }, [user])
 
   useEffect(() => {
@@ -37,7 +41,7 @@ function Chat() {
       })
       const fetchedUsers = response.data
       setUsers(fetchedUsers)
-      if (fetchedUsers.length > 0) {
+      if (fetchedUsers.length > 0 && !selectedUser) {  // ← add !selectedUser check
         setSelectedUser(fetchedUsers[0])
       }
     } catch (error) {
@@ -51,6 +55,8 @@ function Chat() {
   }))
 
   const handleSendMessage = (text) => {
+    console.log('handleSendMessage called with:', text)  // ← add this
+    console.log('selectedUser:', selectedUser)  
     sendMessage(selectedUser.uid, text)
   }
 

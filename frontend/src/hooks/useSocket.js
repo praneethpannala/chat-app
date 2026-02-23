@@ -11,12 +11,13 @@ export default function useSocket() {
   useEffect(() => {
     if (!user) return
 
-    socketRef.current = io(window.location.origin, {
+    socketRef.current = io('http://localhost:3001', {
       query: { userId: user.uid },
       path: '/socket.io',
     })
 
     socketRef.current.on('receiveMessage', (message) => {
+      console.log('receiveMessage event fired:', message)
       setMessages((prev) => [...prev, message])
     })
 
@@ -34,6 +35,7 @@ export default function useSocket() {
 
     socketRef.current.on('connect', () => {
       console.log('Socket connected!')
+      window.__socket = socketRef.current 
     })
 
     socketRef.current.on('connect_error', (error) => {
@@ -50,6 +52,10 @@ export default function useSocket() {
   }, [user])
 
   const sendMessage = (receiverId, text) => {
+    console.log('Socket connected?', socketRef.current?.connected)
+
+    console.log('Emitting sendMessage:', { senderId: user.uid, receiverId, text })
+
     if (!socketRef.current) return
     socketRef.current.emit('sendMessage', {
       senderId: user.uid,

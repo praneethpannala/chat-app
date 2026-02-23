@@ -14,8 +14,8 @@ import { KafkaService } from '../kafka.service';
 
 @WebSocketGateway({
   cors: {
-    origin: 'http://localhost:3000',
-    credentials: true,
+    origin: '*',
+    credentials: false,
   },
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -26,7 +26,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private messagesService: MessagesService,
     private redisService: RedisService,
     private kafkaService: KafkaService,
-  ) {}
+  ) {
+    console.log('ChatGateway initialized!')
+  }
 
   async handleConnection(client: Socket) {
     const userId = client.handshake.query.userId as string;
@@ -53,6 +55,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { senderId: string; receiverId: string; text: string },
   ) {
+    console.log('Message received:', data)
     await this.kafkaService.sendMessage(data);
 
     const message = await this.messagesService.saveMessage(
