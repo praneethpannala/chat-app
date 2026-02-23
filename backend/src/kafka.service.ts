@@ -36,15 +36,11 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
   }
 
   async sendMessage(message: any) {
-    try {
-      console.log('Sending message to Kafka:', message)
-      await this.producer.send({
-        topic: 'messages',
-        messages: [{ value: JSON.stringify(message) }],
-      })
-    } catch (error) {
-      console.warn('Kafka unavailable, skipping:', error.message)
-    }
+    console.log('Sending message to Kafka:', message)
+    await this.producer.send({
+      topic: 'messages',
+      messages: [{ value: JSON.stringify(message) }],
+    })
   }
 
   async consumeMessages(callback: (message: any) => void) {

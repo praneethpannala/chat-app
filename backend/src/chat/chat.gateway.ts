@@ -56,6 +56,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { senderId: string; receiverId: string; text: string },
   ) {
     console.log('Message received:', data)
+    
+    // Send to Kafka first
+    await this.kafkaService.sendMessage(data)
+    
     const message = await this.messagesService.saveMessage(
       data.senderId,
       data.receiverId,
@@ -67,12 +71,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (isReceiverOnline) {
       await this.messagesService.updateStatus(message._id.toString(), 'delivered')
       message.status = 'delivered'
-    }
-
-    try {
-      await this.kafkaService.sendMessage(data)
-    } catch (error) {
-      console.warn('Kafka unavailable, skipping:', error.message)
     }
 
     this.server.emit('receiveMessage', message)
